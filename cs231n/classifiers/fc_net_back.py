@@ -78,10 +78,10 @@ class TwoLayerNet(object):
     # TODO: Implement the forward pass for the two-layer net, computing the    #
     # class scores for X and storing them in the scores variable.              #
     ############################################################################
-    out1, cache1 = affine_forward(X, self.params['W1'], self.params['b1'])
-    out2, cache2 = relu_forward(out1)
-    scores, cache3 = affine_forward(out2, self.params['W2'], self.params['b2'])
-    ##########################################################1##################
+    tmpx = X.reshape(x.shape[0],-1)
+    out1 = np.dot(tmpx, self.params['W1']) + self.params['b1']
+    scores = np.dot(out1, self.params['W2']) + self.params['b2']
+    ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################
 
@@ -100,15 +100,8 @@ class TwoLayerNet(object):
     # automated tests, make sure that your L2 regularization includes a factor #
     # of 0.5 to simplify the expression for the gradient.                      #
     ############################################################################
-    loss_noreg, dout = softmax_loss(scores, y)
-    loss_reg = (np.sum(self.params['W1']**2) + np.sum(self.params['W2']**2)) * self.reg / 2
-    loss = loss_noreg + loss_reg
-    
-    tmpdx, grads['W2'], grads['b2'] = affine_backward(dout ,cache3)
-    w1out = relu_backward(tmpdx, cache2)
-    tmpdx, grads['W1'], grads['b1'] = affine_backward(w1out ,cache1)
-    grads['W1'] += self.reg * self.params['W1']
-    grads['W2'] += self.reg * self.params['W2']
+    loss = cs231n.layers.softmax_loss(scores, y)
+    grad['W2'] = 
     ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################
