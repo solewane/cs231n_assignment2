@@ -20,3 +20,8 @@ plt.rcParams['image.cmap'] = 'gray'
 def rel_error(x, y):
   """ returns relative error """
   return np.max(np.abs(x - y) / (np.maximum(1e-8, np.abs(x) + np.abs(y))))
+
+
+def test(x,y):
+    x +=1
+    return y

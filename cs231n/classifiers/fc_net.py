@@ -174,7 +174,14 @@ class FullyConnectedNet(object):
     # beta2, etc. Scale parameters should be initialized to one and shift      #
     # parameters should be initialized to zero.                                #
     ############################################################################
-    pass
+    self.params['W1'] = np.random.normal(0, weight_scale, [input_dim, hidden_dims[0]])#weight_scale*np.random.randn(input_dim, hidden_dims[0])#
+    self.params['b1'] = np.zeros([hidden_dims[0]])
+    for ilayer in range(1, len(hidden_dims)):
+        self.params['W' + str(ilayer + 1)] = np.random.normal(0, weight_scale, [hidden_dims[ilayer - 1], hidden_dims[ilayer]])
+        self.params['b' + str(ilayer + 1)] = np.zeros(hidden_dims[ilayer])
+    self.params['W' + str(self.num_layers)] = np.random.normal(0, weight_scale, [hidden_dims[-1], num_classes])
+    self.params['b' + str(self.num_layers)] = np.zeros(num_classes)
+    print(self.num_layers)
     ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################
@@ -195,10 +202,10 @@ class FullyConnectedNet(object):
     # pass of the second batch normalization layer, etc.
     self.bn_params = []
     if self.use_batchnorm:
-      self.bn_params = [{'mode': 'train'} for i in xrange(self.num_layers - 1)]
+      self.bn_params = [{'mode': 'train'} for i in range(self.num_layers - 1)]
     
     # Cast all parameters to the correct datatype
-    for k, v in self.params.iteritems():
+    for k, v in self.params.items():
       self.params[k] = v.astype(dtype)
 
 
@@ -232,7 +239,17 @@ class FullyConnectedNet(object):
     # self.bn_params[1] to the forward pass for the second batch normalization #
     # layer, etc.                                                              #
     ############################################################################
-    pass
+    out = {}
+    cache = {}
+    out_relu = {}
+    cache_relu = {}
+    out[1], cache[1] = affine_forward(X, self.params['W' + str(1)], self.params['b' + str(1)])
+    out_relu[1], cache_relu[1] = relu_forward(out[1])
+    for num_layer in range(2, self.num_layers):
+        out[num_layer], cache[num_layer] = affine_forward(out_relu[num_layer - 1], self.params['W' + str(num_layer)], self.params['b' + str(num_layer)])
+        out_relu[num_layer], cache_relu[num_layer] = relu_forward(out[num_layer])
+        
+    scores, cache[self.num_layers] = affine_forward(out_relu[self.num_layers - 1], self.params['W' + str(self.num_layers)], self.params['b' + str(self.num_layers)])
     ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################
@@ -255,7 +272,20 @@ class FullyConnectedNet(object):
     # automated tests, make sure that your L2 regularization includes a factor #
     # of 0.5 to simplify the expression for the gradient.                      #
     ############################################################################
-    pass
+    loss_noreg, dout = softmax_loss(scores, y)
+    loss_reg = 0
+    for num_layer in range(1, self.num_layers):
+        loss_reg += np.sum(self.params['W' + str(num_layer)]**2)
+    loss_reg = loss_reg * self.reg / 2
+    loss = loss_noreg + loss_reg
+    
+    tmpdx, grads['W' + str(self.num_layers)], grads['b' + str(self.num_layers)] = affine_backward(dout ,cache[self.num_layers])
+    for num_layer in range(self.num_layers -1, 0 , -1):
+        tmpdx = relu_backward(tmpdx, cache_relu[num_layer])
+        tmpdx, grads['W' + str(num_layer)], grads['b' + str(num_layer)] = affine_backward(tmpdx ,cache[num_layer])
+        
+    for num_layer in range(1,self.num_layers):
+        grads['W'+ str(num_layer)] += self.reg * self.params['W'+str(num_layer)]
     ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################
