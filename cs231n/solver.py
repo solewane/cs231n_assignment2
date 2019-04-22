@@ -169,6 +169,7 @@ class Solver(object):
     # Perform a parameter update
     for p, w in self.model.params.items():
       dw = grads[p]
+      
       config = self.optim_configs[p]
       next_w, next_config = self.update_rule(w, dw, config)
       self.model.params[p] = next_w
@@ -222,7 +223,7 @@ class Solver(object):
     """
     num_train = self.X_train.shape[0]
     iterations_per_epoch = max(num_train / self.batch_size, 1)
-    print(self.num_epochs,iterations_per_epoch)# test
+#    print(self.num_epochs,iterations_per_epoch)# test
     num_iterations = int(self.num_epochs * iterations_per_epoch)
 
     for t in range(num_iterations):

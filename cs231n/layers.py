@@ -200,9 +200,9 @@ def batchnorm_forward(x, gamma, beta, bn_param):
 #    sigma2 = ((x - mu)**2).mean(0)
     sample_var = x.var(0)
     
-    x_norm = (x - sample_mean) / np.sqrt(sample_var + eps)
+    x_norm = (x - running_mean) / np.sqrt(running_var + eps)
     out = gamma * x_norm + beta
-    cache = (x, sample_mean, sample_var, x_norm, gamma, beta, eps)
+#    cache = (x, sample_mean, sample_var, x_norm, gamma, beta, eps)
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -330,7 +330,9 @@ def dropout_forward(x, dropout_param):
     # TODO: Implement the training phase forward pass for inverted dropout.   #
     # Store the dropout mask in the mask variable.                            #
     ###########################################################################
-    pass
+#    mask = np.zeros(x.shape)
+    mask = (np.random.rand(*x.shape) >= p ) / (1 - p)
+    out = x * mask
     ###########################################################################
     #                            END OF YOUR CODE                             #
     ###########################################################################
@@ -338,7 +340,7 @@ def dropout_forward(x, dropout_param):
     ###########################################################################
     # TODO: Implement the test phase forward pass for inverted dropout.       #
     ###########################################################################
-    pass
+    out = x
     ###########################################################################
     #                            END OF YOUR CODE                             #
     ###########################################################################
@@ -365,7 +367,7 @@ def dropout_backward(dout, cache):
     ###########################################################################
     # TODO: Implement the training phase backward pass for inverted dropout.  #
     ###########################################################################
-    pass
+    dx = dout * mask
     ###########################################################################
     #                            END OF YOUR CODE                             #
     ###########################################################################

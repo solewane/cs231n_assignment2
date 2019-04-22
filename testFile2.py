@@ -573,146 +573,244 @@
 # 
 # =============================================================================
 # =============================================================================
-# # Try training a very deep net with batchnorm
-# #data = get_CIFAR10_data()
-# #hidden_dims = [100, 100, 100, 100, 100]
-# #
-# #num_train = 1000
-# #small_data = {
-# #  'X_train': data['X_train'][:num_train],
-# #  'y_train': data['y_train'][:num_train],
-# #  'X_val': data['X_val'],
-# #  'y_val': data['y_val'],
-# #}
-# #
-# #weight_scale = 2e-2
-# #bn_model = FullyConnectedNet(hidden_dims, weight_scale=weight_scale, use_batchnorm=True)
-# #model = FullyConnectedNet(hidden_dims, weight_scale=weight_scale, use_batchnorm=False)
-# #
-# #bn_solver = Solver(bn_model, small_data,
-# #                num_epochs=10, batch_size=50,
-# #                update_rule='adam',
-# #                optim_config={
-# #                  'learning_rate': 1e-3,
-# #                },
-# #                verbose=True, print_every=200)
-# #bn_solver.train()
-# #
-# #solver = Solver(model, small_data,
-# #                num_epochs=10, batch_size=50,
-# #                update_rule='adam',
-# #                optim_config={
-# #                  'learning_rate': 1e-3,
-# #                },
-# #                verbose=True, print_every=200)
-# #solver.train()
+#  Try training a very deep net with batchnorm
+#data = get_CIFAR10_data()
+#hidden_dims = [100, 100, 100, 100, 100]
+# 
+#num_train = 1000
+#small_data = {
+#   'X_train': data['X_train'][:num_train],
+#   'y_train': data['y_train'][:num_train],
+#   'X_val': data['X_val'],
+#   'y_val': data['y_val'],
+# }
+# 
+#weight_scale = 2e-2
+#bn_model = FullyConnectedNet(hidden_dims, weight_scale=weight_scale, use_batchnorm=True)
+#model = FullyConnectedNet(hidden_dims, weight_scale=weight_scale, use_batchnorm=False)
+# 
+#bn_solver = Solver(bn_model, small_data,
+#                 num_epochs=10, batch_size=50,
+#                 update_rule='adam',
+#                 optim_config={
+#                   'learning_rate': 1e-3,
+#                 },
+#                 verbose=True, print_every=200)
+#bn_solver.train()
+# 
+#solver = Solver(model, small_data,
+#                 num_epochs=10, batch_size=50,
+#                 update_rule='adam',
+#                 optim_config={
+#                   'learning_rate': 1e-3,
+#                 },
+#                 verbose=True, print_every=200)
+#solver.train()
+#   
+#plt.subplot(3, 1, 1)
+#plt.title('Training loss')
+#plt.xlabel('Iteration')
+# 
+#plt.subplot(3, 1, 2)
+#plt.title('Training accuracy')
+#plt.xlabel('Epoch')
+# 
+#plt.subplot(3, 1, 3)
+#plt.title('Validation accuracy')
+#plt.xlabel('Epoch')
+# 
+#plt.subplot(3, 1, 1)
+#plt.plot(solver.loss_history, 'o', label='baseline')
+#plt.plot(bn_solver.loss_history, 'o', label='batchnorm')
+# 
+#plt.subplot(3, 1, 2)
+#plt.plot(solver.train_acc_history, '-o', label='baseline')
+#plt.plot(bn_solver.train_acc_history, '-o', label='batchnorm')
+# 
+#plt.subplot(3, 1, 3)
+#plt.plot(solver.val_acc_history, '-o', label='baseline')
+#plt.plot(bn_solver.val_acc_history, '-o', label='batchnorm')
+#   
+#for i in [1, 2, 3]:
+#    
+#    plt.subplot(3, 1, i)
+#    plt.legend(loc='upper center', ncol=2)
+#plt.gcf().set_size_inches(15, 15)
+#plt.show()
+# =============================================================================
+# Try training a very deep net with batchnorm
+# =============================================================================
+# data = get_CIFAR10_data() 
+# hidden_dims = [50, 50, 50, 50, 50, 50, 50]
+# 
+# num_train = 1000
+# small_data = {
+#   'X_train': data['X_train'][:num_train],
+#   'y_train': data['y_train'][:num_train],
+#   'X_val': data['X_val'],
+#   'y_val': data['y_val'],
+# }
+# 
+# bn_solvers = {}
+# solvers = {}
+# weight_scales = np.logspace(-4, 0, num=20)
+# for i, weight_scale in enumerate(weight_scales):
+#   print ('Running weight scale %d / %d' % (i + 1, len(weight_scales)))
+#   bn_model = FullyConnectedNet(hidden_dims, weight_scale=weight_scale, use_batchnorm=True)
+#   model = FullyConnectedNet(hidden_dims, weight_scale=weight_scale, use_batchnorm=False)
+# 
+#   bn_solver = Solver(bn_model, small_data,
+#                   num_epochs=10, batch_size=50,
+#                   update_rule='adam',
+#                   optim_config={
+#                     'learning_rate': 1e-3,
+#                   },
+#                   verbose=False, print_every=200)
+#   bn_solver.train()
+#   bn_solvers[weight_scale] = bn_solver
+# 
+#   solver = Solver(model, small_data,
+#                   num_epochs=10, batch_size=50,
+#                   update_rule='adam',
+#                   optim_config={
+#                     'learning_rate': 1e-3,
+#                   },
+#                   verbose=False, print_every=200)
+#   solver.train()
+#   solvers[weight_scale] = solver
+# best_train_accs, bn_best_train_accs = [], []
+# best_val_accs, bn_best_val_accs = [], []
+# final_train_loss, bn_final_train_loss = [], []
+# 
+# for ws in weight_scales:
+#   best_train_accs.append(max(solvers[ws].train_acc_history))
+#   bn_best_train_accs.append(max(bn_solvers[ws].train_acc_history))
+#   
+#   best_val_accs.append(max(solvers[ws].val_acc_history))
+#   bn_best_val_accs.append(max(bn_solvers[ws].val_acc_history))
+#   
+#   final_train_loss.append(np.mean(solvers[ws].loss_history[-100:]))
+#   bn_final_train_loss.append(np.mean(bn_solvers[ws].loss_history[-100:]))
 #   
 # plt.subplot(3, 1, 1)
-# plt.title('Training loss')
-# plt.xlabel('Iteration')
+# plt.title('Best val accuracy vs weight initialization scale')
+# plt.xlabel('Weight initialization scale')
+# plt.ylabel('Best val accuracy')
+# plt.semilogx(weight_scales, best_val_accs, '-o', label='baseline')
+# plt.semilogx(weight_scales, bn_best_val_accs, '-o', label='batchnorm')
+# plt.legend(ncol=2, loc='lower right')
 # 
 # plt.subplot(3, 1, 2)
-# plt.title('Training accuracy')
-# plt.xlabel('Epoch')
+# plt.title('Best train accuracy vs weight initialization scale')
+# plt.xlabel('Weight initialization scale')
+# plt.ylabel('Best training accuracy')
+# plt.semilogx(weight_scales, best_train_accs, '-o', label='baseline')
+# plt.semilogx(weight_scales, bn_best_train_accs, '-o', label='batchnorm')
+# plt.legend()
 # 
 # plt.subplot(3, 1, 3)
-# plt.title('Validation accuracy')
-# plt.xlabel('Epoch')
+# plt.title('Final training loss vs weight initialization scale')
+# plt.xlabel('Weight initialization scale')
+# plt.ylabel('Final training loss')
+# plt.semilogx(weight_scales, final_train_loss, '-o', label='baseline')
+# plt.semilogx(weight_scales, bn_final_train_loss, '-o', label='batchnorm')
+# plt.legend()
+# 
+# plt.gcf().set_size_inches(10, 15)
+# plt.show()
+# =============================================================================
+# =============================================================================
+# x = np.random.randn(500, 500) + 10
+# 
+# for p in [0.3, 0.6, 0.75]:
+#   out, _ = dropout_forward(x, {'mode': 'train', 'p': p})
+#   out_test, _ = dropout_forward(x, {'mode': 'test', 'p': p})
+# 
+#   print ('Running tests with p = ', )
+#   print ('Mean of input: ', x.mean())
+#   print ('Mean of train-time output: ', out.mean())
+#   print ('Mean of test-time output: ', out_test.mean())
+#   print ('Fraction of train-time output set to zero: ', (out == 0).mean())
+#   print ('Fraction of test-time output set to zero: ', (out_test == 0).mean())
+#   print
+# =============================================================================
+# =============================================================================
+# x = np.random.randn(10, 10) + 10
+# dout = np.random.randn(*x.shape)
+# 
+# dropout_param = {'mode': 'train', 'p': 0.8, 'seed': 123}
+# out, cache = dropout_forward(x, dropout_param)
+# dx = dropout_backward(dout, cache)
+# dx_num = eval_numerical_gradient_array(lambda xx: dropout_forward(xx, dropout_param)[0], x, dout)
+# 
+# print ('dx relative error: ', rel_error(dx, dx_num))
+# =============================================================================
+N, D, H1, H2, C = 2, 15, 20, 30, 10
+X = np.random.randn(N, D)
+y = np.random.randint(C, size=(N,))
+
+for dropout in [0, 0.25, 0.5]:
+  print ('Running check with dropout = ', dropout)
+  model = FullyConnectedNet([H1, H2], input_dim=D, num_classes=C,
+                            weight_scale=5e-2, dtype=np.float64,
+                            dropout=dropout, seed=123)
+
+  loss, grads = model.loss(X, y)
+  print ('Initial loss: ', loss)
+
+  for name in sorted(grads):
+    f = lambda _: model.loss(X, y)[0]
+    grad_num = eval_numerical_gradient(f, model.params[name], verbose=False, h=1e-5)
+    print ('%s relative error: %.2e' % (name, rel_error(grad_num, grads[name])))
+  print
+# =============================================================================
+# data = get_CIFAR10_data() 
+# num_train = 500
+# small_data = {
+#   'X_train': data['X_train'][:num_train],
+#   'y_train': data['y_train'][:num_train],
+#   'X_val': data['X_val'],
+#   'y_val': data['y_val'],
+# }
+# 
+# solvers = {}
+# dropout_choices = [0, 0.75]
+# for dropout in dropout_choices:
+#   model = FullyConnectedNet([500], dropout=dropout)
+#   print (dropout)
+# 
+#   solver = Solver(model, small_data,
+#                   num_epochs=25, batch_size=100,
+#                   update_rule='adam',
+#                   optim_config={
+#                     'learning_rate': 5e-4,
+#                   },
+#                   verbose=True, print_every=100)
+#   solver.train()
+#   solvers[dropout] = solver
+# train_accs = []
+# val_accs = []
+# for dropout in dropout_choices:
+#   solver = solvers[dropout]
+#   train_accs.append(solver.train_acc_history[-1])
+#   val_accs.append(solver.val_acc_history[-1])
 # 
 # plt.subplot(3, 1, 1)
-# plt.plot(solver.loss_history, 'o', label='baseline')
-# plt.plot(bn_solver.loss_history, 'o', label='batchnorm')
-# 
-# plt.subplot(3, 1, 2)
-# plt.plot(solver.train_acc_history, '-o', label='baseline')
-# plt.plot(bn_solver.train_acc_history, '-o', label='batchnorm')
-# 
-# plt.subplot(3, 1, 3)
-# plt.plot(solver.val_acc_history, '-o', label='baseline')
-# plt.plot(bn_solver.val_acc_history, '-o', label='batchnorm')
+# for dropout in dropout_choices:
+#   plt.plot(solvers[dropout].train_acc_history, 'o', label='%.2f dropout' % dropout)
+# plt.title('Train accuracy')
+# plt.xlabel('Epoch')
+# plt.ylabel('Accuracy')
+# plt.legend(ncol=2, loc='lower right')
 #   
-# for i in [1, 2, 3]:
-#   plt.subplot(3, 1, i)
-#   plt.legend(loc='upper center', ncol=2)
+# plt.subplot(3, 1, 2)
+# for dropout in dropout_choices:
+#   plt.plot(solvers[dropout].val_acc_history, 'o', label='%.2f dropout' % dropout)
+# plt.title('Val accuracy')
+# plt.xlabel('Epoch')
+# plt.ylabel('Accuracy')
+# plt.legend(ncol=2, loc='lower right')
+# 
 # plt.gcf().set_size_inches(15, 15)
 # plt.show()
 # =============================================================================
-# Try training a very deep net with batchnorm
-data = get_CIFAR10_data() 
-hidden_dims = [50, 50, 50, 50, 50, 50, 50]
-
-num_train = 1000
-small_data = {
-  'X_train': data['X_train'][:num_train],
-  'y_train': data['y_train'][:num_train],
-  'X_val': data['X_val'],
-  'y_val': data['y_val'],
-}
-
-bn_solvers = {}
-solvers = {}
-weight_scales = np.logspace(-4, 0, num=20)
-for i, weight_scale in enumerate(weight_scales):
-  print ('Running weight scale %d / %d' % (i + 1, len(weight_scales)))
-  bn_model = FullyConnectedNet(hidden_dims, weight_scale=weight_scale, use_batchnorm=True)
-  model = FullyConnectedNet(hidden_dims, weight_scale=weight_scale, use_batchnorm=False)
-
-  bn_solver = Solver(bn_model, small_data,
-                  num_epochs=10, batch_size=50,
-                  update_rule='adam',
-                  optim_config={
-                    'learning_rate': 1e-3,
-                  },
-                  verbose=False, print_every=200)
-  bn_solver.train()
-  bn_solvers[weight_scale] = bn_solver
-
-  solver = Solver(model, small_data,
-                  num_epochs=10, batch_size=50,
-                  update_rule='adam',
-                  optim_config={
-                    'learning_rate': 1e-3,
-                  },
-                  verbose=False, print_every=200)
-  solver.train()
-  solvers[weight_scale] = solver
-best_train_accs, bn_best_train_accs = [], []
-best_val_accs, bn_best_val_accs = [], []
-final_train_loss, bn_final_train_loss = [], []
-
-for ws in weight_scales:
-  best_train_accs.append(max(solvers[ws].train_acc_history))
-  bn_best_train_accs.append(max(bn_solvers[ws].train_acc_history))
-  
-  best_val_accs.append(max(solvers[ws].val_acc_history))
-  bn_best_val_accs.append(max(bn_solvers[ws].val_acc_history))
-  
-  final_train_loss.append(np.mean(solvers[ws].loss_history[-100:]))
-  bn_final_train_loss.append(np.mean(bn_solvers[ws].loss_history[-100:]))
-  
-plt.subplot(3, 1, 1)
-plt.title('Best val accuracy vs weight initialization scale')
-plt.xlabel('Weight initialization scale')
-plt.ylabel('Best val accuracy')
-plt.semilogx(weight_scales, best_val_accs, '-o', label='baseline')
-plt.semilogx(weight_scales, bn_best_val_accs, '-o', label='batchnorm')
-plt.legend(ncol=2, loc='lower right')
-
-plt.subplot(3, 1, 2)
-plt.title('Best train accuracy vs weight initialization scale')
-plt.xlabel('Weight initialization scale')
-plt.ylabel('Best training accuracy')
-plt.semilogx(weight_scales, best_train_accs, '-o', label='baseline')
-plt.semilogx(weight_scales, bn_best_train_accs, '-o', label='batchnorm')
-plt.legend()
-
-plt.subplot(3, 1, 3)
-plt.title('Final training loss vs weight initialization scale')
-plt.xlabel('Weight initialization scale')
-plt.ylabel('Final training loss')
-plt.semilogx(weight_scales, final_train_loss, '-o', label='baseline')
-plt.semilogx(weight_scales, bn_final_train_loss, '-o', label='batchnorm')
-plt.legend()
-
-plt.gcf().set_size_inches(10, 15)
-plt.show()
