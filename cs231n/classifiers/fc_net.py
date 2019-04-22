@@ -256,15 +256,15 @@ class FullyConnectedNet(object):
 # #    out_relu[1], cache_relu[1] = relu_forward(out[1])
 #     out_relu[0] = X
 #     for num_layer in range(1, self.num_layers):
-#         out[num_layer], cache[num_layer] = affine_forward(out_relu[num_layer - 1], self.params['W' + str(num_layer)], self.params['b' + str(num_layer)])
-#         if self.use_batchnorm:
-#             out[num_layer],cache_bn[num_layer] = batchnorm_forward(out[num_layer], self.params['gamma' + str(num_layer)], self.params['beta' + str(num_layer)], bn_param)
-#         out_relu[num_layer], cache_relu[num_layer] = relu_forward(out[num_layer])
-#         if self.use_dropout:
-#             out_relu[num_layer], cache_dropout[num_layer] = dropout_forward(out[num_layer], self.dropout_param)
+#       out[num_layer], cache[num_layer] = affine_forward(out_relu[num_layer - 1], self.params['W' + str(num_layer)], self.params['b' + str(num_layer)])
+#       if self.use_batchnorm:
+#         out[num_layer],cache_bn[num_layer] = batchnorm_forward(out[num_layer], self.params['gamma' + str(num_layer)], self.params['beta' + str(num_layer)], bn_param)
+#       out_relu[num_layer], cache_relu[num_layer] = relu_forward(out[num_layer])
+#       if self.use_dropout:
+#         out_relu[num_layer], cache_dropout[num_layer] = dropout_forward(out[num_layer], self.dropout_param)
 #             
 #     scores, cache[self.num_layers] = affine_forward(out_relu[self.num_layers - 1], self.params['W' + str(self.num_layers)], self.params['b' + str(self.num_layers)])
-# =============================================================================
+# # =============================================================================
     ar_cache = {}
     dp_cache = {}
     layer_input = X
@@ -307,25 +307,34 @@ class FullyConnectedNet(object):
     ############################################################################
 # =============================================================================
 #     loss_noreg, dout = softmax_loss(scores, y)
-#     loss_reg = 0
-#     for num_layer in range(1, self.num_layers):
-#         loss_reg += np.sum(self.params['W' + str(num_layer)]**2)
-#     loss_reg = loss_reg * self.reg / 2
-#     loss = loss_noreg + loss_reg
+# #    loss_reg = 0
+# #    for num_layer in range(1, self.num_layers):
+# #        loss_reg += np.sum(self.params['W' + str(num_layer)]**2)
+# #    loss_reg = loss_reg * self.reg / 2
+#     loss = loss_noreg + self.reg * np.sum(self.params['W' + str(self.num_layers)] * self.params['W' + str(self.num_layers)])/2
 #     
 #     tmpdx, grads['W' + str(self.num_layers)], grads['b' + str(self.num_layers)] = affine_backward(dout ,cache[self.num_layers])
+#     
+#     grads['W'+ str(self.num_layers)] += self.reg * self.params['W'+str(self.num_layers)]
+#     
 #     for num_layer in range(self.num_layers -1, 0 , -1):
-#         if self.use_dropout:
-#             tmpdx = dropout_backward(tmpdx, cache_dropout[num_layer])
-#         tmpdx = relu_backward(tmpdx, cache_relu[num_layer])
-#         if self.use_batchnorm:
-#             tmpdx,grads['gamma' + str(num_layer)],grads['beta' + str(num_layer)] = batchnorm_backward(tmpdx, cache_bn[num_layer])
-#         tmpdx, grads['W' + str(num_layer)], grads['b' + str(num_layer)] = affine_backward(tmpdx ,cache[num_layer])
+#       loss += self.reg * np.sum(self.params['W' + str(num_layer)] * self.params['W' + str(num_layer)])/2
+#     
+#       if self.use_dropout:
+#         tmpdx = dropout_backward(tmpdx, cache_dropout[num_layer])
+#       tmpdx = relu_backward(tmpdx, cache_relu[num_layer])
+#       if self.use_batchnorm:
+#         tmpdx,grads['gamma' + str(num_layer)],grads['beta' + str(num_layer)] = batchnorm_backward(tmpdx, cache_bn[num_layer])
+#       tmpdx, grads['W' + str(num_layer)], grads['b' + str(num_layer)] = affine_backward(tmpdx ,cache[num_layer])
+#       
+#       grads['W'+ str(num_layer)] += self.reg * self.params['W'+str(num_layer)]  
 #         
-#         
-#     for num_layer in range(1,self.num_layers):
-#         grads['W'+ str(num_layer)] += self.reg * self.params['W'+str(num_layer)]
+# #    for num_layer in range(1,self.num_layers):
+# #        grads['W'+ str(num_layer)] += self.reg * self.params['W'+str(num_layer)]
+#     
+#     
 # =============================================================================
+    ##############3
     loss, dscores = softmax_loss(scores, y)
     loss += 0.5 * self.reg * np.sum(self.params['W' + str(self.num_layers)] * self.params['W' + str(self.num_layers)])
     dout, dw, db = affine_backward(dscores, ar_cache[self.num_layers])
