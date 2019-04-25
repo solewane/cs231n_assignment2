@@ -245,43 +245,43 @@ class FullyConnectedNet(object):
     # self.bn_params[1] to the forward pass for the second batch normalization #
     # layer, etc.                                                              #
     ############################################################################
-# =============================================================================
-#     out = {}
-#     cache = {}
-#     out_relu = {}
-#     cache_relu = {}
-#     cache_bn = {}
-#     cache_dropout = {}
-# #    out[1], cache[1] = affine_forward(X, self.params['W' + str(1)], self.params['b' + str(1)])
-# #    out_relu[1], cache_relu[1] = relu_forward(out[1])
-#     out_relu[0] = X
-#     for num_layer in range(1, self.num_layers):
-#       out[num_layer], cache[num_layer] = affine_forward(out_relu[num_layer - 1], self.params['W' + str(num_layer)], self.params['b' + str(num_layer)])
-#       if self.use_batchnorm:
-#         out[num_layer],cache_bn[num_layer] = batchnorm_forward(out[num_layer], self.params['gamma' + str(num_layer)], self.params['beta' + str(num_layer)], bn_param)
-#       out_relu[num_layer], cache_relu[num_layer] = relu_forward(out[num_layer])
-#       if self.use_dropout:
-#         out_relu[num_layer], cache_dropout[num_layer] = dropout_forward(out[num_layer], self.dropout_param)
-#             
-#     scores, cache[self.num_layers] = affine_forward(out_relu[self.num_layers - 1], self.params['W' + str(self.num_layers)], self.params['b' + str(self.num_layers)])
-# # =============================================================================
-    ar_cache = {}
-    dp_cache = {}
-    layer_input = X
-    for i in range(1, self.num_layers):
+    out = {}
+    cache = {}
+    out_relu = {}
+    cache_relu = {}
+    cache_bn = {}
+    cache_dropout = {}
+#    out[1], cache[1] = affine_forward(X, self.params['W' + str(1)], self.params['b' + str(1)])
+#    out_relu[1], cache_relu[1] = relu_forward(out[1])
+    out_relu[0] = X
+    for num_layer in range(1, self.num_layers):
+      out[num_layer], cache[num_layer] = affine_forward(out_relu[num_layer - 1], self.params['W' + str(num_layer)], self.params['b' + str(num_layer)])
       if self.use_batchnorm:
-        layer_input, ar_cache[i-1] = affine_bn_relu_forward(
-            layer_input, self.params['W'+str(i)], self.params['b'+str(i)],
-            self.params['gamma'+str(i)], self.params['beta'+str(i)], self.bn_params[i-1])
-      else:
-        layer_input, ar_cache[i-1] = affine_relu_forward(
-            layer_input, self.params['W'+str(i)], self.params['b'+str(i)])
+        out[num_layer],cache_bn[num_layer] = batchnorm_forward(out[num_layer], self.params['gamma' + str(num_layer)], self.params['beta' + str(num_layer)], bn_param)
+      out_relu[num_layer], cache_relu[num_layer] = relu_forward(out[num_layer])
       if self.use_dropout:
-        layer_input, dp_cache[i-1] = dropout_forward(layer_input, self.dropout_param)
-    
-    layer_out, ar_cache[self.num_layers] = affine_forward(
-        layer_input,self.params['W'+str(self.num_layers)], self.params['b'+str(self.num_layers)])
-    scores = layer_out
+        out_relu[num_layer], cache_dropout[num_layer] = dropout_forward(out_relu[num_layer], self.dropout_param)
+            
+    scores, cache[self.num_layers] = affine_forward(out_relu[self.num_layers - 1], self.params['W' + str(self.num_layers)], self.params['b' + str(self.num_layers)])
+# =============================================================================
+#     ar_cache = {}
+#     dp_cache = {}
+#     layer_input = X
+#     for i in range(1, self.num_layers):
+#       if self.use_batchnorm:
+#         layer_input, ar_cache[i-1] = affine_bn_relu_forward(
+#             layer_input, self.params['W'+str(i)], self.params['b'+str(i)],
+#             self.params['gamma'+str(i)], self.params['beta'+str(i)], self.bn_params[i-1])
+#       else:
+#         layer_input, ar_cache[i-1] = affine_relu_forward(
+#             layer_input, self.params['W'+str(i)], self.params['b'+str(i)])
+#       if self.use_dropout:
+#         layer_input, dp_cache[i-1] = dropout_forward(layer_input, self.dropout_param)
+#     
+#     layer_out, ar_cache[self.num_layers] = affine_forward(
+#         layer_input,self.params['W'+str(self.num_layers)], self.params['b'+str(self.num_layers)])
+#     scores = layer_out
+# =============================================================================
 
     ############################################################################
     #                             END OF YOUR CODE                             #
@@ -305,54 +305,54 @@ class FullyConnectedNet(object):
     # automated tests, make sure that your L2 regularization includes a factor #
     # of 0.5 to simplify the expression for the gradient.                      #
     ############################################################################
-# =============================================================================
-#     loss_noreg, dout = softmax_loss(scores, y)
-# #    loss_reg = 0
-# #    for num_layer in range(1, self.num_layers):
-# #        loss_reg += np.sum(self.params['W' + str(num_layer)]**2)
-# #    loss_reg = loss_reg * self.reg / 2
-#     loss = loss_noreg + self.reg * np.sum(self.params['W' + str(self.num_layers)] * self.params['W' + str(self.num_layers)])/2
-#     
-#     tmpdx, grads['W' + str(self.num_layers)], grads['b' + str(self.num_layers)] = affine_backward(dout ,cache[self.num_layers])
-#     
-#     grads['W'+ str(self.num_layers)] += self.reg * self.params['W'+str(self.num_layers)]
-#     
-#     for num_layer in range(self.num_layers -1, 0 , -1):
-#       loss += self.reg * np.sum(self.params['W' + str(num_layer)] * self.params['W' + str(num_layer)])/2
-#     
-#       if self.use_dropout:
-#         tmpdx = dropout_backward(tmpdx, cache_dropout[num_layer])
-#       tmpdx = relu_backward(tmpdx, cache_relu[num_layer])
-#       if self.use_batchnorm:
-#         tmpdx,grads['gamma' + str(num_layer)],grads['beta' + str(num_layer)] = batchnorm_backward(tmpdx, cache_bn[num_layer])
-#       tmpdx, grads['W' + str(num_layer)], grads['b' + str(num_layer)] = affine_backward(tmpdx ,cache[num_layer])
-#       
-#       grads['W'+ str(num_layer)] += self.reg * self.params['W'+str(num_layer)]  
-#         
-# #    for num_layer in range(1,self.num_layers):
-# #        grads['W'+ str(num_layer)] += self.reg * self.params['W'+str(num_layer)]
-#     
-#     
-# =============================================================================
-    ##############3
-    loss, dscores = softmax_loss(scores, y)
-    loss += 0.5 * self.reg * np.sum(self.params['W' + str(self.num_layers)] * self.params['W' + str(self.num_layers)])
-    dout, dw, db = affine_backward(dscores, ar_cache[self.num_layers])
-    grads['W'+str(self.num_layers)] = dw + self.reg * self.params['W' + str(self.num_layers)]
-    grads['b'+str(self.num_layers)] = db
-    for i in range(self.num_layers-1):
-      layer = self.num_layers - i - 1
-      loss += 0.5 * self.reg * np.sum(self.params['W' + str(layer)] * self.params['W' + str(layer)])
+    loss_noreg, dout = softmax_loss(scores, y)
+#    loss_reg = 0
+#    for num_layer in range(1, self.num_layers):
+#        loss_reg += np.sum(self.params['W' + str(num_layer)]**2)
+#    loss_reg = loss_reg * self.reg / 2
+    loss = loss_noreg + self.reg * np.sum(self.params['W' + str(self.num_layers)] * self.params['W' + str(self.num_layers)])/2
+    
+    tmpdx, grads['W' + str(self.num_layers)], grads['b' + str(self.num_layers)] = affine_backward(dout ,cache[self.num_layers])
+    
+    grads['W'+ str(self.num_layers)] += self.reg * self.params['W'+str(self.num_layers)]
+    
+    for num_layer in range(self.num_layers -1, 0 , -1):
+      loss += self.reg * np.sum(self.params['W' + str(num_layer)] * self.params['W' + str(num_layer)])/2
+    
       if self.use_dropout:
-        dout = dropout_backward(dout, dp_cache[layer-1])
+        tmpdx = dropout_backward(tmpdx, cache_dropout[num_layer])
+      tmpdx = relu_backward(tmpdx, cache_relu[num_layer])
       if self.use_batchnorm:
-        dout, dw, db, dgamma, dbeta = affine_bn_relu_backward(dout, ar_cache[layer-1])
-        grads['gamma' + str(layer)] = dgamma
-        grads['beta' + str(layer)] = dbeta
-      else:
-        dout, dw, db = affine_relu_backward(dout, ar_cache[layer-1])
-      grads['W' + str(layer)] = dw + self.reg * self.params['W' + str(layer)]
-      grads['b' + str(layer)] = db
+        tmpdx,grads['gamma' + str(num_layer)],grads['beta' + str(num_layer)] = batchnorm_backward(tmpdx, cache_bn[num_layer])
+      tmpdx, grads['W' + str(num_layer)], grads['b' + str(num_layer)] = affine_backward(tmpdx ,cache[num_layer])
+      
+      grads['W'+ str(num_layer)] += self.reg * self.params['W'+str(num_layer)]  
+        
+#    for num_layer in range(1,self.num_layers):
+#        grads['W'+ str(num_layer)] += self.reg * self.params['W'+str(num_layer)]
+    
+    
+    ##############3
+# =============================================================================
+#     loss, dscores = softmax_loss(scores, y)
+#     loss += 0.5 * self.reg * np.sum(self.params['W' + str(self.num_layers)] * self.params['W' + str(self.num_layers)])
+#     dout, dw, db = affine_backward(dscores, ar_cache[self.num_layers])
+#     grads['W'+str(self.num_layers)] = dw + self.reg * self.params['W' + str(self.num_layers)]
+#     grads['b'+str(self.num_layers)] = db
+#     for i in range(self.num_layers-1):
+#       layer = self.num_layers - i - 1
+#       loss += 0.5 * self.reg * np.sum(self.params['W' + str(layer)] * self.params['W' + str(layer)])
+#       if self.use_dropout:
+#         dout = dropout_backward(dout, dp_cache[layer-1])
+#       if self.use_batchnorm:
+#         dout, dw, db, dgamma, dbeta = affine_bn_relu_backward(dout, ar_cache[layer-1])
+#         grads['gamma' + str(layer)] = dgamma
+#         grads['beta' + str(layer)] = dbeta
+#       else:
+#         dout, dw, db = affine_relu_backward(dout, ar_cache[layer-1])
+#       grads['W' + str(layer)] = dw + self.reg * self.params['W' + str(layer)]
+#       grads['b' + str(layer)] = db
+# =============================================================================
 
     ############################################################################
     #                             END OF YOUR CODE                             #
