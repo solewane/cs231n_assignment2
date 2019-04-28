@@ -443,7 +443,29 @@ def conv_backward_naive(dout, cache):
   #############################################################################
   # TODO: Implement the convolutional backward pass.                          #
   #############################################################################
-  pass
+  (x, w, b, conv_param) = cache
+
+  pad_num = conv_param['pad']
+  stride_num = conv_param['stride']
+  x_pad = np.pad(x,((0,0),(0,0),(pad_num,pad_num),(pad_num,pad_num)),'constant')
+  N, C, H, W = x.shape
+  F, _, HH, WW =w.shape
+  _, _, H_out, W_out = dout.shape
+#  dx = np.zeros((N, C, H, W))
+  dw = np.zeros((F, C, HH, WW))
+  db = dout.sum(0).sum(1).sum(1)
+  ww = w[:,::-1,::-1]
+  dx_pad = np.zeros((N, C, H + 2*pad_num, W + 2*pad_num))
+  for m in range(H_out):
+      for n in range(W_out):
+#          tmp = (dout[:,:,m,n].dot(w.reshape(F,-1))).reshape(N, C, HH, WW)
+          dx_pad[:, :, (m*stride_num):(m*stride_num + HH), (n*stride_num):(n*stride_num + WW)] += \
+          (dout[:,:,m,n].dot(w.reshape(F,-1))).reshape(N, C, HH, WW)
+          for i in range(F):
+              dw[i, :, :, :] += (dout[:, i, m, n, np.newaxis, np.newaxis, np.newaxis] * \
+                x_pad[:, : ,(m*stride_num):(m*stride_num + HH), (n*stride_num):(n*stride_num + WW)]).sum(0)
+  dx = dx_pad[:, :, pad_num:-pad_num, pad_num:-pad_num]
+  
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
@@ -469,7 +491,15 @@ def max_pool_forward_naive(x, pool_param):
   #############################################################################
   # TODO: Implement the max pooling forward pass                              #
   #############################################################################
-  pass
+  pool_height = pool_param['pool_height']
+  pool_width = pool_param['pool_width']
+  stride = pool_param['stride']
+  N, C, H, W = x.shape
+  H_out = 1 + (H - pool_height) / stride
+  W_out = 1 + (W - pool_width) / stride
+  for i in range(H_out):
+      for j in range(W_out):
+          
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################

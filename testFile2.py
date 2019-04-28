@@ -902,21 +902,45 @@
 # imshow_noax(out[1, 1])
 # plt.show()
 # =============================================================================
-x = np.random.randn(4, 3, 5, 5)
-w = np.random.randn(2, 3, 3, 3)
-b = np.random.randn(2,)
-dout = np.random.randn(4, 2, 5, 5)
-conv_param = {'stride': 1, 'pad': 1}
+# =============================================================================
+# x = np.random.randn(4, 3, 5, 5)
+# w = np.random.randn(2, 3, 3, 3)
+# b = np.random.randn(2,)
+# dout = np.random.randn(4, 2, 5, 5)
+# conv_param = {'stride': 1, 'pad': 1}
+# 
+# dx_num = eval_numerical_gradient_array(lambda x: conv_forward_naive(x, w, b, conv_param)[0], x, dout)
+# dw_num = eval_numerical_gradient_array(lambda w: conv_forward_naive(x, w, b, conv_param)[0], w, dout)
+# db_num = eval_numerical_gradient_array(lambda b: conv_forward_naive(x, w, b, conv_param)[0], b, dout)
+# 
+# out, cache = conv_forward_naive(x, w, b, conv_param)
+# dx, dw, db = conv_backward_naive(dout, cache)
+# 
+# # Your errors should be around 1e-9'
+# print ('Testing conv_backward_naive function')
+# print ('dx error: ', rel_error(dx, dx_num))
+# print ('dw error: ', rel_error(dw, dw_num))
+# print ('db error: ', rel_error(db, db_num))
+# =============================================================================
+x_shape = (2, 3, 4, 4)
+x = np.linspace(-0.3, 0.4, num=np.prod(x_shape)).reshape(x_shape)
+pool_param = {'pool_width': 2, 'pool_height': 2, 'stride': 2}
 
-dx_num = eval_numerical_gradient_array(lambda x: conv_forward_naive(x, w, b, conv_param)[0], x, dout)
-dw_num = eval_numerical_gradient_array(lambda w: conv_forward_naive(x, w, b, conv_param)[0], w, dout)
-db_num = eval_numerical_gradient_array(lambda b: conv_forward_naive(x, w, b, conv_param)[0], b, dout)
+out, _ = max_pool_forward_naive(x, pool_param)
 
-out, cache = conv_forward_naive(x, w, b, conv_param)
-dx, dw, db = conv_backward_naive(dout, cache)
+correct_out = np.array([[[[-0.26315789, -0.24842105],
+                          [-0.20421053, -0.18947368]],
+                         [[-0.14526316, -0.13052632],
+                          [-0.08631579, -0.07157895]],
+                         [[-0.02736842, -0.01263158],
+                          [ 0.03157895,  0.04631579]]],
+                        [[[ 0.09052632,  0.10526316],
+                          [ 0.14947368,  0.16421053]],
+                         [[ 0.20842105,  0.22315789],
+                          [ 0.26736842,  0.28210526]],
+                         [[ 0.32631579,  0.34105263],
+                          [ 0.38526316,  0.4       ]]]])
 
-# Your errors should be around 1e-9'
-print ('Testing conv_backward_naive function')
-print ('dx error: ', rel_error(dx, dx_num))
-print ('dw error: ', rel_error(dw, dw_num))
-print ('db error: ', rel_error(db, db_num))
+# Compare your output with ours. Difference should be around 1e-8.
+print ('Testing max_pool_forward_naive function:')
+print ('difference: ', rel_error(out, correct_out))
